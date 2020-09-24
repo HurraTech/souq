@@ -5,7 +5,7 @@ services:
     cap_add:
      - NET_ADMIN
     network_mode: "host"
-    image: aimannajjar/hurracloud:openvpn-aarch64
+    image: docker-openvpn
     ports:
      - "1194:1194/udp"
     restart: always
@@ -14,7 +14,7 @@ services:
      - openvpn-data:/etc/openvpn
 
   pki:
-    image: aimannajjar/hurracloud:openvpn-aarch64
+    image: docker-openvpn
     network_mode: "host"
     restart: unless-stopped
     command: "/bin/bash -c 'trap : TERM INT; (while sleep 3600; do :; done) & wait'"

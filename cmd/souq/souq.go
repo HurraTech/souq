@@ -38,6 +38,8 @@ func main() {
 	controller := &controller.Controller{MetadataDir: options.MetadataDir}
 	e := echo.New()
 	e.GET("/apps", controller.GetApps)
-	e.GET("/apps/:id", controller.DownloadApp)
+	e.GET("/apps/:id", controller.GetApp)
+	e.GET("/apps/:id/image", controller.DownloadApp)
+	e.GET("/apps/:id/containers/:container", controller.DownloadAppContainerImage)
 	log.Fatal(e.Start(fmt.Sprintf("%s:%d", options.Host, options.Port)))
 }

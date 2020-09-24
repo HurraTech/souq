@@ -3,9 +3,8 @@ var fs = require('fs');
 
 class HurraApp {
 
-    constructor(server, db) {
+    constructor(server) {
         this.server = server
-        this.db = db
     }
 
     init() {

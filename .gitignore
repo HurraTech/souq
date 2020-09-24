@@ -51,5 +51,6 @@ Thumbs.db
 # sqlite
 *.db
 
-# souq 
+# souq
 apps/*.tar.gz
+apps/**/*.tar.gz
