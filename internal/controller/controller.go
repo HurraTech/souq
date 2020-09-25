@@ -107,6 +107,23 @@ func (c *Controller) DownloadAppContainerImage(ctx echo.Context) error {
 	return ctx.File(path.Join(c.MetadataDir, fmt.Sprintf("%s.tar.gz", appID)))
 }
 
+/* GET /apps/:id/containers */
+func (c *Controller) ListAppContainers(ctx echo.Context) error {
+	appID := ctx.Param("id")
+	containersFile := path.Join(c.MetadataDir, appID, "containers", "containers.yml")
+
+	_, err := os.Stat(containersFile)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return ctx.JSON(http.StatusNotFound, map[string]string{"message": "no containers found"})
+		}
+		log.Errorf("Error while checking for containers.yml: %s", err)
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "unexpected error"})
+	}
+
+	return ctx.File(containersFile)
+}
+
 func (c *Controller) readAppMetadata(name string) (*App, error) {
 	// Read metadata file
 	metadataPath := path.Join(c.MetadataDir, name, "metadata.yml")
