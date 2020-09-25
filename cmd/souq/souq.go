@@ -41,6 +41,6 @@ func main() {
 	e.GET("/apps/:id", controller.GetApp)
 	e.GET("/apps/:id/image", controller.DownloadApp)
 	e.GET("/apps/:id/containers", controller.ListAppContainers)
-	e.GET("/apps/:id/containers/:container", controller.DownloadAppContainerImage)
+	e.GET("/containers/:app/:container", controller.DownloadAppContainerImage)
 	log.Fatal(e.Start(fmt.Sprintf("%s:%d", options.Host, options.Port)))
 }

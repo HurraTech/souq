@@ -14,13 +14,19 @@ def main():
         for svc in containers["services"]:
             service = containers["services"][svc]
             #TODO: Validations
+            image = service["image"]
+            if not image.startswith("%s/" % app_name):
+                print("ERROR: Invalid image: '%s' images must start with prefix '%s/'" % (image, app_name))
+                exit(1)
             images.add(service["image"])
 
-    for image in images:
+    for image_tag in images:
+        # remove prefix
+        image = image_tag.replace("%s/" % app_name, "", 1)
         print("Building %s" % image)
         os.chdir("%s/containers/%s" % (app_name, image))
-        os.system("docker build . -t %s" % image)
-        os.system("docker save %s | gzip > ../%s.tar.gz" % (image, image))
+        os.system("docker build . -t %s" % image_tag)
+        os.system("docker save %s | gzip > ../%s.tar.gz" % (image_tag, image))
 if __name__ == "__main__":
     main()
 

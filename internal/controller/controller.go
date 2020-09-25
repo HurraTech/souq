@@ -89,9 +89,9 @@ func (c *Controller) DownloadApp(ctx echo.Context) error {
 	return ctx.File(path.Join(c.MetadataDir, fmt.Sprintf("%s.tar.gz", appID)))
 }
 
-/* GET /apps/:id/containers/:container */
+/* GET /containers/:app/:container */
 func (c *Controller) DownloadAppContainerImage(ctx echo.Context) error {
-	appID := ctx.Param("id")
+	appID := ctx.Param("app")
 	containerName := ctx.Param("container")
 	imageFile := path.Join(c.MetadataDir, appID, "containers", fmt.Sprintf("%s.tar.gz", containerName))
 
