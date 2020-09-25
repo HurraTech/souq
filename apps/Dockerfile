@@ -30,7 +30,7 @@ COPY --chown=node:node ./apps-container .
 
 # Copy application files
 COPY $APP_SRC/ui ./client/src/HurraApp
-COPY $APP_SRC/backend ./server/src/HurraApp
+COPY $APP_SRC/backend ./server/HurraApp
 
 RUN cd ./client && npm run-script build && npm upgrade caniuse-lite browserslist
 RUN cd ./server && npm run-script build && npm upgrade caniuse-lite browserslist

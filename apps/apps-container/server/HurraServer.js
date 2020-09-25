@@ -8,10 +8,10 @@ export default class HurraServer {
     let auid = process.env.REACT_APP_AUID
     return new Promise((resolve, reject) => {
       axios
-      .get(`${JAWHAR_API}/apps/${auid}`)
+      .get(`${JAWHAR_API}/apps/${auid}/state`)
       .then(res => {
-        console.log("RESULT OF STATE IS", res.data.state)
-          resolve(res.data.state)
+        console.log("RESULT OF STATE IS", res.data)
+          resolve(res.data)
       })
 
 
@@ -23,13 +23,9 @@ export default class HurraServer {
     let auid = process.env.REACT_APP_AUID
     return new Promise((resolve, reject) => {
       axios
-      .put(`${JAWHAR_API}/apps/${auid}`, {
-        app: {
-          state: state
-        }
-      })
+      .post(`${JAWHAR_API}/apps/${auid}/state`, state)
       .then(res => {
-          resolve(res.data.state)
+          resolve(res.data)
       })
 
     })
@@ -39,25 +35,22 @@ export default class HurraServer {
     let auid = process.env.REACT_APP_AUID
     return new Promise((resolve, reject) => {
       axios
-      .patch(`${JAWHAR_API}/apps/${auid}`, {
-        app: {
-          state: state
-        }
-      })
+      .patch(`${JAWHAR_API}/apps/${auid}/state`, state)
       .then(res => {
-          resolve(res.data.state)
+          resolve(res.data)
       })
 
     })
   }
 
-  static exec(container, command, env = {}) {
+  static exec(container, command, args = [], env = {}) {
     let auid = process.env.REACT_APP_AUID
     return new Promise((resolve, reject) => {
       axios
-      .post(`${JAWHAR_API}/apps/${auid}/${container}/_exec`, {
-        cmd: command,
-        env: env
+      .post(`${JAWHAR_API}/apps/${auid}/${container}/command`, {
+        Cmd: command,
+        Args: args,
+        Env: env
       })
       .then(res => {
           resolve(res.data)
@@ -66,23 +59,12 @@ export default class HurraServer {
     })
   }
 
-  static restart_container(container) {
-    let auid = process.env.REACT_APP_AUID
-    return new Promise((resolve, reject) => {
-      axios
-      .get(`${JAWHAR_API}/apps/${auid}/${container}/_restart`)
-      .then(res => {
-          resolve(res.data)
-      })
-
-    })
-  }
 
   static start_container(container) {
     let auid = process.env.REACT_APP_AUID
     return new Promise((resolve, reject) => {
       axios
-      .get(`${JAWHAR_API}/apps/${auid}/${container}/_start`)
+      .put(`${JAWHAR_API}/apps/${auid}/${container}`)
       .then(res => {
           resolve(res.data)
       })
@@ -94,7 +76,7 @@ export default class HurraServer {
     let auid = process.env.REACT_APP_AUID
     return new Promise((resolve, reject) => {
       axios
-      .get(`${JAWHAR_API}/apps/${auid}/${container}/_stop`)
+      .delete(`${JAWHAR_API}/apps/${auid}/${container}`)
       .then(res => {
           resolve(res.data)
       })
@@ -103,21 +85,23 @@ export default class HurraServer {
   }
 
 
-  static exec_sync(container, command, env = {}) {
+  static exec_sync(container, command, args = [], env = {}) {
     let auid = process.env.REACT_APP_AUID
-    console.log(`EXECUTING COMMAND ${JAWHAR_API}/apps/${auid}/${container}/_exec`,{
-        cmd: command,
-        env: env
+    console.log(`EXECUTING COMMAND ${JAWHAR_API}/apps/${auid}/${container}/command`,{
+        Cmd: command,
+        Args: args,
+        Env: env
     })
 
     return new Promise((resolve, reject) => {
       axios
-      .post(`${JAWHAR_API}/apps/${auid}/${container}/_exec`, {
-        cmd: command,
-        env: env
+      .post(`${JAWHAR_API}/apps/${auid}/${container}/command`, {
+        Cmd: command,
+        Args: args,
+        Env: env
       })
       .then(res => {
-        HurraServer.wait_for_cmd(res.data.command, resolve)
+        HurraServer.wait_for_cmd(res.data, resolve)
       })
 
     })
@@ -125,8 +109,8 @@ export default class HurraServer {
 
   static wait_for_cmd(command, resolver)
   {
-    HurraServer.get_command(command.id).then(command_update => {
-      if (command_update.status == "completed") {
+    HurraServer.get_command(command.ID).then(command_update => {
+      if (command_update.Status == "completed") {
         console.log("Command completed", command_update)
         resolver(command_update)
       } else {
@@ -139,9 +123,9 @@ export default class HurraServer {
     let auid = process.env.REACT_APP_AUID
     return new Promise((resolve, reject) => {
       axios
-      .get(`${JAWHAR_API}/apps/${auid}/app_commands/${cmd_id}`)
+      .get(`${JAWHAR_API}/commands/${cmd_id}`)
       .then((statusRes) => {
-        console.log(`Command ${cmd_id} Status`, statusRes.data.status);
+        console.log(`Command ${cmd_id} Status`, statusRes.data.Status);
         resolve(statusRes.data)
       })
     })

@@ -28,7 +28,7 @@ class HurraApp {
         return new Promise((resolve,reject) => {
             console.log("Refreshing clients list")
             HurraServer.exec_sync("pki", "ovpn_listclients").then(async (command) => {
-                var clients = command.output.split("\n")
+                var clients = command.Output.split("\n")
                 clients.shift() // first element is just header
                 clients.forEach(client => {
                     var [client_key, created, expires, status] = client.split(",")
@@ -54,7 +54,7 @@ class HurraApp {
     setupRoutes() {
         this.server.get('/reset', (req, res) => {
             console.log("Goingt to reset")
-            HurraServer.exec_sync("pki", "rm -rf /etc/openvpn/*", {}).then(async (command) => {
+            HurraServer.exec_sync("pki", "rm", ["-rf", "/etc/openvpn/*"]).then(async (command) => {
                 await HurraServer.stop_container("server")
                 HurraServer.setState({status: "uninitialized"}).then(state => {
                     res.send({done: true})
@@ -77,8 +77,8 @@ class HurraApp {
             console.log("Request Body", req.body)
             console.log("ENV",  { "CA_PASS": req.body.password })
             await HurraServer.patchState({status: `removing_${client_filename}`})
-            HurraServer.exec_sync("pki", `revoke_user ${client_filename}`, { "CA_PASS": req.body.password }).then(async (command) => {
-                var result = command.output.trim()
+            HurraServer.exec_sync("pki", "revoke_user", [client_filename], { "CA_PASS": req.body.password }).then(async (command) => {
+                var result = command.Output.trim()
                 console.log(`Result is '${result}'`)
                 switch (result) {
                     case "ERROR":
@@ -102,8 +102,8 @@ class HurraApp {
             console.log("Executing", `create_new_user ${client_filename}`)
             console.log("ENV",  { "CA_PASS": req.body.password })
             await HurraServer.patchState({status: "adding_user"})
-            HurraServer.exec_sync("pki", `create_new_user ${client_filename}`, { "CA_PASS": req.body.password }).then(async (command) => {
-                var result = command.output.trim()
+            HurraServer.exec_sync("pki", "create_new_user", [client_filename], { "CA_PASS": req.body.password }).then(async (command) => {
+                var result = command.Output.trim()
                 console.log(`Result is '${result}'`)
                 switch (result) {
                     case "ERROR:1":
@@ -133,8 +133,8 @@ class HurraApp {
 
         this.server.post('/setup', async (req, res) => {
             await HurraServer.setState({status: "initializing"})
-            HurraServer.exec_sync("pki", "setup_vpn_server", {}).then((command) => {
-                HurraServer.exec_sync("pki", "ovpn_initpki",
+            HurraServer.exec_sync("pki", "setup_vpn_server").then((command) => {
+                HurraServer.exec_sync("pki", "ovpn_initpki", [],
                     {
                         "EASYRSA_BATCH": 1,
                         "EASYRSA_REQ_CN": "HurraVPN",
@@ -150,9 +150,9 @@ class HurraApp {
         })
 
         this.server.get('/users/:client_key/ovpn', async (req, res) => {
-            HurraServer.exec_sync("pki", `gen_client_ovpn ${req.params.client_key}`, {}).then((command) => {
+            HurraServer.exec_sync("pki", "gen_client_ovpn", [req.params.client_key], {}).then((command) => {
                 res.set({"Content-Disposition":`attachment; filename=${req.params.client_key}.ovpn`});
-                res.send(command.output)
+                res.send(command.Output)
             })
         })
     }
