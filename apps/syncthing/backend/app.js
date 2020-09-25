@@ -23,7 +23,7 @@ class HurraApp {
 
 
     setupRoutes() {
-        this.server.get('/*', HurraServer.service_http_proxy('syncthing', 8384))
+        this.server.get('/*', HurraServer.service_http_proxy('syncthing-web', 8384))
     }
 
     sanitize_client_name(name) {

@@ -9,7 +9,7 @@ class HurraApp extends React.PureComponent {
   }
 
   render() {
-	return ( window.location = `//${window.location.hostname}:${process.env.REACT_APP_PROXY_PORT}/index.html`)
+	return ( window.location = `//${window.location.hostname}:28384`)
   }
 }
 

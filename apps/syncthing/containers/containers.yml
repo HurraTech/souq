@@ -3,7 +3,6 @@ version: '2.3'
 services:
   syncthing:
     image: syncthing/syncthing
-    container_name: syncthing
     environment:
       - PUID=1000
       - PGID=1000
@@ -19,7 +18,7 @@ services:
         bind:
           propagation: shared
     ports:
-      - 8384
+      - 28384:8384
       - 22000
       - 21027/udp
     restart: unless-stopped
