@@ -39,11 +39,14 @@ RUN cd ./server && npm run-script build && npm upgrade caniuse-lite browserslist
 
 ######### RUN-TIME IMAGE ##############
 FROM node:14.8.0-alpine
-RUN npm install -g serve concurrently
+RUN apk add --no-cache nginx && \
+        mkdir -p /var/run/nginx /var/lib/nginx && \
+        npm install -g concurrently
 
-USER node
+USER root
 WORKDIR /home/node
 COPY --from=build /home/node/client/build ./client
 COPY --from=build /home/node/server/dist ./server
+COPY ./nginx.conf /home/node/client/nginx.conf
 
-CMD ["concurrently", "--kill-others-on-fail", "cd server && node server.js HurraServer.js", "cd client && HURRA_HOSTNAME=$HURRA_HOSTNAME serve -p 3000"]
+CMD ["concurrently", "--kill-others-on-fail", "cd server && node server.js HurraServer.js", "nginx -c /home/node/client/nginx.conf"]

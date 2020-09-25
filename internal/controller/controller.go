@@ -86,7 +86,7 @@ func (c *Controller) DownloadApp(ctx echo.Context) error {
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "unexpected error"})
 	}
 
-	return ctx.File(path.Join(c.MetadataDir, fmt.Sprintf("%s.tar.gz", appID)))
+	return ctx.File(imageFile)
 }
 
 /* GET /containers/:app/:container */
@@ -104,7 +104,7 @@ func (c *Controller) DownloadAppContainerImage(ctx echo.Context) error {
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "unexpected error"})
 	}
 
-	return ctx.File(path.Join(c.MetadataDir, fmt.Sprintf("%s.tar.gz", appID)))
+	return ctx.File(imageFile)
 }
 
 /* GET /apps/:id/containers */

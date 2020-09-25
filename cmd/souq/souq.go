@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"path/filepath"
 
 	"github.com/jessevdk/go-flags"
 	"github.com/labstack/echo/v4"
@@ -35,7 +36,13 @@ func main() {
 	database.OpenDatabase(string(options.Database))
 	database.Migrate()
 
-	controller := &controller.Controller{MetadataDir: options.MetadataDir}
+	metadataDir, err := filepath.Abs(options.MetadataDir)
+	if err != nil {
+		log.Warnf("Could not determine absolute path for metdata directory '%s': %s", options.MetadataDir, err)
+		metadataDir = options.MetadataDir
+	}
+
+	controller := &controller.Controller{MetadataDir: metadataDir}
 	e := echo.New()
 	e.GET("/apps", controller.GetApps)
 	e.GET("/apps/:id", controller.GetApp)
