@@ -25,13 +25,20 @@ type Controller struct {
 
 type App struct {
 	UniqueID        string
-	Name            string
-	Description     string
-	LongDescription string `yaml:"long_description"`
-	Publisher       string
-	Version         string
+	Name            string `yaml:"Name"`
+	Description     string `yaml:"Description"`
+	LongDescription string `yaml:"LongDescription"`
+	Publisher       string `yaml:"Publisher"`
+	Version         string `yaml:"Version"`
+	WebApp          WebApp `yaml:"WebApp"`
 	Icon            string
 	Containers      string
+}
+
+type WebApp struct {
+	Type            string `yaml:"Type"`
+	TargetPort      int    `yaml:"TargetPort"`
+	TargetContainer string `yaml:"TargetContainer"`
 }
 
 /* GET /apps */

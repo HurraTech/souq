@@ -15,9 +15,13 @@ services:
 
   pki:
     image: openvpn/docker-openvpn
-    network_mode: "host"
     restart: unless-stopped
     command: "/bin/bash -c 'trap : TERM INT; (while sleep 3600; do :; done) & wait'"
+    networks:
+        - openvpn
+
+networks:
+  openvpn:
 
 volumes:
   openvpn-data:

@@ -20,7 +20,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 
-const styles = theme => ({  
+const styles = theme => ({
   root: {
     display: 'flex',
     flexDirection: 'column',
@@ -49,7 +49,7 @@ const styles = theme => ({
 
   logo: {
     backgroundRepeat: 'no-repeat',
-    backgroundImage: 'url("/static/icon.svg")',
+    backgroundImage: 'url(static/icon.svg")',
     backgroundSize: 60,
     height:60,
     width: 80,
@@ -59,7 +59,7 @@ const styles = theme => ({
   container: {
     display: 'flex',
     flexWrap: 'wrap',
-    flexDirection: 'column',    
+    flexDirection: 'column',
   },
 
   title: {
@@ -105,11 +105,11 @@ const styles = theme => ({
   },
 
   rightAligned: {
-    textAlign: 'right' 
+    textAlign: 'right'
   },
 
   centerAligned: {
-    textAlign: 'center' 
+    textAlign: 'center'
   },
 
   tableHeaderRow: {
@@ -129,7 +129,7 @@ const styles = theme => ({
   }
 
 });
-  
+
 
 class HurraApp extends React.Component {
   constructor(props) {
@@ -167,7 +167,7 @@ class HurraApp extends React.Component {
 
   refreshAll = async () => {
     await this.setState({loading: true})
-    let state = (await (await fetch('/refresh')).json());
+    let state = (await (await fetch('refresh')).json());
     let status = state.status
     console.log("Status is", status)
     this.setState({loading: false, status: status, users: state.users })
@@ -177,9 +177,9 @@ class HurraApp extends React.Component {
     this.refreshState(true)
   }
 
-  refreshState = (background=false) => {    
+  refreshState = (background=false) => {
     this.setState({loading: !background}, async () => {
-        let state = (await (await fetch('/state')).json());
+        let state = (await (await fetch('state')).json());
         let status = state.status
         console.log("Status is", status)
         if (status === "initializing" ) {
@@ -196,13 +196,13 @@ class HurraApp extends React.Component {
 
   reset = () => {
     this.setState({loading: true}, async () => {
-    const response = await fetch('/reset');
+    const response = await fetch('reset');
     const body = await response.json();
     if (response.status !== 200) throw Error(body.message);
       this.refreshState()
     })
   }
-  
+
   openAddUserDialog = () => {
     this.setState({addUserDialog: true})
   }
@@ -213,7 +213,7 @@ class HurraApp extends React.Component {
 
   onAddUserSave = (name, adminPassword) => {
     this.setState({status: "adding_user", addUserDialog: false}, async () => {
-      let response = (await axios.post('/user', { password: adminPassword, name: name })).data;      
+      let response = (await axios.post('user', { password: adminPassword, name: name })).data;
       if (response.status && response.status == "ok") {
         this.setState({status: response.status, users: response.users })
       } else {
@@ -228,10 +228,10 @@ class HurraApp extends React.Component {
     console.log("Downloading OVPN", client_key)
     this.state.users[client_key]["downloadingConfig"] = true
     this.forceUpdate()
-    const response = await fetch(`/users/${client_key}/ovpn`, {
+    const response = await fetch(`users/${client_key}/ovpn`, {
       headers: new Headers({
         'Accept': 'text/plain'
-      }), 
+      }),
     });
     const ovpn_text = await response.text()
     console.log("DONE", ovpn_text)
@@ -260,7 +260,7 @@ class HurraApp extends React.Component {
       this.showErrorDialog(response.error)
     }
   }
-  
+
   showErrorDialog = (message) => {
     this.setState({errorDialogOpen: true, errorDialogMessage: message})
   }
@@ -298,88 +298,86 @@ class HurraApp extends React.Component {
                 </DialogActions>
               </Dialog>
 
-              <AddUserDialog 
-                  open={this.state.addUserDialog} 
+              <AddUserDialog
+                  open={this.state.addUserDialog}
                   onClose={this.cancelAddUserDialog.bind(this)}
                   onSave={this.onAddUserSave}
               />
-              <RevokeUserDialog 
-                  open={this.state.revokeUserDialog} 
+              <RevokeUserDialog
+                  open={this.state.revokeUserDialog}
                   onClose={this.cancelRevokeUserDialog.bind(this)}
                   onSave={this.onRevokeUserSave}
               />
-              <div className={classes.logoRow}><span className={classes.logo} /><Typography variant="h6" className={classes.title}>OpenVPN Server</Typography></div>               
-                <Route path="/setup" render={() => (<SetupPage onSetupComplete={this.onSetupComplete} />)}/>
-                <Route exact path="/" render={() => (
-                    this.state.status == "uninitialized" ? (<Redirect to="/setup" />) : (<>
-                      <Paper className={classes.root} >
-                        <Table className={classes.table}>
-                          <TableHead>
-                              <TableRow className={classes.tableHeaderRow}>
-                                <TableCell variant="head" className={classes.tableHeaderCell}>Users List</TableCell>
-                                <TableCell variant="head" className={classes.tableHeaderCell}>Created</TableCell>
-                                <TableCell variant="head" className={classes.tableHeaderCell}>Expires</TableCell>
-                                <TableCell variant="head" className={classes.tableHeaderCell}>Status</TableCell>
-                                <TableCell variant="head" className={classes.tableHeaderCell}></TableCell>
-                              </TableRow>
-                          </TableHead>
-                          <TableBody>
-                            {Object.keys(this.state.users).map(user_key => {
-                              let userStatus = (this.state.users[user_key]["status"] == "INVALID") ? "Inactive" : "Active"
-                              if (this.state.status == `removing_${user_key}`) {
-                                return (<TableRow><TableCell variant="body" className={classNames(classes.tableRow, classes.centerAligned)} scope="row" colSpan={5} >
-                                <CircularProgress className={classes.progress} size={30} />
-                                </TableCell></TableRow>)
-                              } else {
-                                  return (<TableRow>
-                                            <TableCell variant="body" className={classNames(classes.tableRow)} scope="row">{this.state.users[user_key]["client_name"]}</TableCell>
-                                            <TableCell variant="body" className={classNames(classes.tableRow)} scope="row">{this.state.users[user_key]["created"]}</TableCell>
-                                            <TableCell variant="body" className={classNames(classes.tableRow)} scope="row">{this.state.users[user_key]["expires"]}</TableCell>
-                                            <TableCell variant="body" className={classNames(classes.tableRow, userStatus == "Active" ? classes.activeUser : classes.inactiveUser)} scope="row">{userStatus}</TableCell>
-                                            <TableCell variant="body"  className={classNames(classes.tableRow, classes.rightAligned)} scope="row">
-                                            { userStatus == "Active" && 
-                                              <>                                              
-                                                {(() => { if ("downloadingConfig" in this.state.users[user_key] &&
-                                                              this.state.users[user_key]["downloadingConfig"] === true) {
-                                                                  return <CircularProgress className={classes.downloading} size={15} />
-                                                          } else {
-                                                            return (<Tooltip title="Donwload File"><Button  color="inherit" className={classNames(classes.tableButton)} onClick={() => {this.downloadOVPN(user_key)}} >
-                                                            <DownloadIcon color="inherit" />OpenVPN Config
-                                                          </Button></Tooltip>)
-                                                          }
+              <div className={classes.logoRow}><span className={classes.logo} /><Typography variant="h6" className={classes.title}>OpenVPN Server</Typography></div>
+              { this.state.status == "uninitialized" && (<SetupPage onSetupComplete={this.onSetupComplete} />) }
+              {this.state.status != "uninitialized" && (<>
+                <Paper className={classes.root} >
+                  <Table className={classes.table}>
+                    <TableHead>
+                        <TableRow className={classes.tableHeaderRow}>
+                          <TableCell variant="head" className={classes.tableHeaderCell}>Users List</TableCell>
+                          <TableCell variant="head" className={classes.tableHeaderCell}>Created</TableCell>
+                          <TableCell variant="head" className={classes.tableHeaderCell}>Expires</TableCell>
+                          <TableCell variant="head" className={classes.tableHeaderCell}>Status</TableCell>
+                          <TableCell variant="head" className={classes.tableHeaderCell}></TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {Object.keys(this.state.users).map(user_key => {
+                        let userStatus = (this.state.users[user_key]["status"] == "INVALID") ? "Inactive" : "Active"
+                        if (this.state.status == `removing_${user_key}`) {
+                          return (<TableRow><TableCell variant="body" className={classNames(classes.tableRow, classes.centerAligned)} scope="row" colSpan={5} >
+                          <CircularProgress className={classes.progress} size={30} />
+                          </TableCell></TableRow>)
+                        } else {
+                            return (<TableRow>
+                                      <TableCell variant="body" className={classNames(classes.tableRow)} scope="row">{this.state.users[user_key]["client_name"]}</TableCell>
+                                      <TableCell variant="body" className={classNames(classes.tableRow)} scope="row">{this.state.users[user_key]["created"]}</TableCell>
+                                      <TableCell variant="body" className={classNames(classes.tableRow)} scope="row">{this.state.users[user_key]["expires"]}</TableCell>
+                                      <TableCell variant="body" className={classNames(classes.tableRow, userStatus == "Active" ? classes.activeUser : classes.inactiveUser)} scope="row">{userStatus}</TableCell>
+                                      <TableCell variant="body"  className={classNames(classes.tableRow, classes.rightAligned)} scope="row">
+                                      { userStatus == "Active" &&
+                                        <>
+                                          {(() => { if ("downloadingConfig" in this.state.users[user_key] &&
+                                                        this.state.users[user_key]["downloadingConfig"] === true) {
+                                                            return <CircularProgress className={classes.downloading} size={15} />
+                                                    } else {
+                                                      return (<Tooltip title="Donwload File"><Button  color="inherit" className={classNames(classes.tableButton)} onClick={() => {this.downloadOVPN(user_key)}} >
+                                                      <DownloadIcon color="inherit" />OpenVPN Config
+                                                    </Button></Tooltip>)
+                                                    }
 
-                                                })()}
-                                              <Tooltip title="Revoke Credentials">
-                                                <Button color="inherit" className={classNames(classes.tableButton)}  onClick={() => {this.openRevokeUserDialog(user_key)}} disabled={this.state.status != "ok"}>
-                                                  <DeleteIcon color="inherit" />
-                                                  Revoke Access
-                                                </Button>
-                                              </Tooltip></>}
-                                            </TableCell>
-                                  </TableRow>)
-                              }
-                            })}
-                            { this.state.status == "adding_user" && <TableRow>
-                              <TableCell variant="body" className={classNames(classes.tableRow, classes.centerAligned)} scope="row" colSpan={5} >
-                                <CircularProgress className={classes.progress} size={30} />
-                              </TableCell>
-                          </TableRow>}
-                          </TableBody>
-                        </Table>
-                        <div className={classes.actionBar}>
-                          <Button variant="contained" color="primary" className={classes.button} onClick={this.openAddUserDialog.bind(this)} disabled={this.state.status != "ok"}>Add New User</Button>
-                          <Button variant="contained" color="secondary" className={classes.button}  onClick={() => { this.reset()}} disabled={this.state.status != "ok"}>Reset</Button>
-                          <Button variant="contained" className={classes.button} onClick={this.refreshAll} disabled={this.state.status != "ok"}>Refresh</Button>
-                          <Button variant="contained" className={classes.button} onClick={this.openAddUserDialog.bind(this)}>Help</Button>
-                        </div>      
-                        <div className={classes.actionBar}>
-                          <Typography variant="subtitle2">
-                            Create a user above for each person and device you would like to grant remote access. It is recommended to create separate user for each device you own. For example, you can create one for your iOS, and another for your laptop and so on.                            
-                          </Typography>                        
-                        </div>
-                      </Paper>
-                      </>
-                    ))} />
+                                          })()}
+                                        <Tooltip title="Revoke Credentials">
+                                          <Button color="inherit" className={classNames(classes.tableButton)}  onClick={() => {this.openRevokeUserDialog(user_key)}} disabled={this.state.status != "ok"}>
+                                            <DeleteIcon color="inherit" />
+                                            Revoke Access
+                                          </Button>
+                                        </Tooltip></>}
+                                      </TableCell>
+                            </TableRow>)
+                        }
+                      })}
+                      { this.state.status == "adding_user" && <TableRow>
+                        <TableCell variant="body" className={classNames(classes.tableRow, classes.centerAligned)} scope="row" colSpan={5} >
+                          <CircularProgress className={classes.progress} size={30} />
+                        </TableCell>
+                    </TableRow>}
+                    </TableBody>
+                  </Table>
+                  <div className={classes.actionBar}>
+                    <Button variant="contained" color="primary" className={classes.button} onClick={this.openAddUserDialog.bind(this)} disabled={this.state.status != "ok"}>Add New User</Button>
+                    <Button variant="contained" color="secondary" className={classes.button}  onClick={() => { this.reset()}} disabled={this.state.status != "ok"}>Reset</Button>
+                    <Button variant="contained" className={classes.button} onClick={this.refreshAll} disabled={this.state.status != "ok"}>Refresh</Button>
+                    <Button variant="contained" className={classes.button} onClick={this.openAddUserDialog.bind(this)}>Help</Button>
+                  </div>
+                  <div className={classes.actionBar}>
+                    <Typography variant="subtitle2">
+                      Create a user above for each person and device you would like to grant remote access. It is recommended to create separate user for each device you own. For example, you can create one for your iOS, and another for your laptop and so on.
+                    </Typography>
+                  </div>
+                </Paper>
+                </>)}
             </main>
 
   }

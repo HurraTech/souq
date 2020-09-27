@@ -1,11 +1,12 @@
 import express from 'express';
 import HurraApp from './HurraApp/app';
+var cors = require('cors')
 
 var args = process.argv.slice(2);
 
 const server = express();
 const port = process.env.PORT || 5000;
-
+server.use(cors())
 server.use(express.json())
 
 let app = new HurraApp(server)

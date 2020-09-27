@@ -1,5 +1,8 @@
-name: Syncthing
-description: Allows you to sync your computer files, documents and photos with your HurraCloud drive automatically (e.g. for backup and sharing)
-publisher: HurraNet LLC
-version: 0.1.1
-initCommands: []
+Name: Syncthing
+Description: Allows you to sync your computer files, documents and photos with your HurraCloud drive automatically (e.g. for backup and sharing)
+Publisher: HurraNet LLC
+Version: 0.1.1
+WebApp:
+  Type: container
+  TargetContainer: syncthing-web
+  TargetPort: 8384

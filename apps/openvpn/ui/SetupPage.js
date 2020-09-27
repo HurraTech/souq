@@ -29,7 +29,7 @@ const styles = theme => ({
 
     logo: {
       backgroundRepeat: 'no-repeat',
-      backgroundImage: 'url("/static/icon.svg")',
+      backgroundImage: 'url("static/icon.svg")',
       backgroundSize: 60,
       height:60,
       width: 80,
@@ -85,7 +85,7 @@ class SetupPage extends React.Component {
 
     refreshState = () => {
         this.setState({loading: true}, async () => {
-            let status = (await (await fetch('/state')).json()).status;
+            let status = (await (await fetch('state')).json()).status;
             if (status === "initializing") {
               this.setState({loading: true, status: status}, () => {
                 setTimeout(this.refreshState, 1000);
@@ -102,15 +102,18 @@ class SetupPage extends React.Component {
 
     savePassword = () => {
         this.setState({loading: true}, async () => {
-          let response = await axios.post('/setup', { password: this.state.password });
+          let response = await axios.post('setup', { password: this.state.password });
           this.setState({loading: false, status: "ok"}, this.props.onSetupComplete())
         });
     }
 
     render = () => {
         const { classes } = this.props;
-        if (this.state.status === "ok")
-            return <Redirect to='/' />;
+        if (this.state.status === "ok" && this.props.onSetupComplete()) {
+          this.props.onSetupComplete();
+          return (<></>)
+        }
+
         if (this.state.loading)
             return (<div className={classes.root}>
                     <CircularProgress className={classes.progress} />

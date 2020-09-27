@@ -5,11 +5,19 @@ class HurraApp extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
+      content: ""
     };
   }
 
+  async componentDidMount() {
+    let page = (await (await fetch('/index.html')).text());
+    this.setState({
+      content: page
+    })
+  }
+
   render() {
-	return ( window.location = `//${window.location.hostname}:28384`)
+	return <div dangerouslySetInnerHTML={{__html: this.state.content}} />
   }
 }
 

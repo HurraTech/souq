@@ -1,14 +1,12 @@
 ---
 version: '2.3'
 services:
-  syncthing:
+  syncthing-web:
     image: syncthing/syncthing
     environment:
       - PUID=1000
       - PGID=1000
       - UMASK_SET=<022>
-      - VIRTUAL_HOST=synchthing.local
-      - VIRTUAL_PORT=8384
       - HTTPS_METHOD=nohttps
     volumes:
       - syncthing-config:/config
@@ -18,10 +16,17 @@ services:
         bind:
           propagation: shared
     ports:
-      - 28384:8384
+      - 8384
       - 22000
       - 21027/udp
     restart: unless-stopped
+    networks:
+      - syncthing
+
+
+
+networks:
+  syncthing:
 
 volumes:
   syncthing-config:
