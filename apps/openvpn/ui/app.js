@@ -252,7 +252,7 @@ class HurraApp extends React.Component {
   onRevokeUserSave = async (adminPassword) => {
     console.log("Revoking client", this.state.selectedUser)
     await this.setState({revokeUserDialog: false, status: `removing_${this.state.selectedUser}` })
-    let response = (await axios.delete(`/users/${this.state.selectedUser}`, { data: { password: adminPassword }})).data
+    let response = (await axios.delete(`users/${this.state.selectedUser}`, { data: { password: adminPassword }})).data
     if (response.status && response.status == "ok") {
       this.setState({status: response.status, users: response.users, selectedUser: null })
     } else {
