@@ -20,7 +20,7 @@ var (
 )
 
 type Controller struct {
-	MetadataDir string
+	AppsDir string
 }
 
 type App struct {
@@ -44,7 +44,7 @@ type WebApp struct {
 /* GET /apps */
 func (c *Controller) GetApps(ctx echo.Context) error {
 
-	appsMetadata, err := filepath.Glob(path.Join(c.MetadataDir, "**", "metadata.yml"))
+	appsMetadata, err := filepath.Glob(path.Join(c.AppsDir, "**", "metadata.yml"))
 	if err != nil {
 		log.Errorf("Unexpected scanning metadata directory: %s", err)
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "unexpected error"})
@@ -82,7 +82,7 @@ func (c *Controller) GetApp(ctx echo.Context) error {
 /* GET /apps/:id/image */
 func (c *Controller) DownloadApp(ctx echo.Context) error {
 	appID := ctx.Param("id")
-	imageFile := path.Join(c.MetadataDir, fmt.Sprintf("%s.tar.gz", appID))
+	imageFile := path.Join(c.AppsDir, fmt.Sprintf("%s.tar.gz", appID))
 
 	log.Debugf("Request to download %s", imageFile)
 	_, err := os.Stat(imageFile)
@@ -100,7 +100,7 @@ func (c *Controller) DownloadApp(ctx echo.Context) error {
 func (c *Controller) DownloadAppContainerImage(ctx echo.Context) error {
 	appID := ctx.Param("app")
 	containerName := ctx.Param("container")
-	imageFile := path.Join(c.MetadataDir, appID, "containers", fmt.Sprintf("%s.tar.gz", containerName))
+	imageFile := path.Join(c.AppsDir, appID, "containers", fmt.Sprintf("%s.tar.gz", containerName))
 
 	log.Debugf("Request to download %s", imageFile)
 	_, err := os.Stat(imageFile)
@@ -117,7 +117,7 @@ func (c *Controller) DownloadAppContainerImage(ctx echo.Context) error {
 /* GET /apps/:id/containers */
 func (c *Controller) ListAppContainers(ctx echo.Context) error {
 	appID := ctx.Param("id")
-	containersFile := path.Join(c.MetadataDir, appID, "containers", "containers.yml")
+	containersFile := path.Join(c.AppsDir, appID, "containers", "containers.yml")
 
 	_, err := os.Stat(containersFile)
 	if err != nil {
@@ -133,7 +133,7 @@ func (c *Controller) ListAppContainers(ctx echo.Context) error {
 
 func (c *Controller) readAppMetadata(name string) (*App, error) {
 	// Read metadata file
-	metadataPath := path.Join(c.MetadataDir, name, "metadata.yml")
+	metadataPath := path.Join(c.AppsDir, name, "metadata.yml")
 	if _, err := os.Stat(metadataPath); os.IsNotExist(err) {
 		return nil, AppNotFound
 	}
@@ -153,7 +153,7 @@ func (c *Controller) readAppMetadata(name string) (*App, error) {
 	// Check for containers.yml
 	seen := make(map[string]bool)
 	var images []string
-	containersPath := path.Join(c.MetadataDir, name, "containers", "containers.yml")
+	containersPath := path.Join(c.AppsDir, name, "containers", "containers.yml")
 	if _, err := os.Stat(containersPath); err == nil {
 		contents, err := ioutil.ReadFile(containersPath)
 		if err != nil {
