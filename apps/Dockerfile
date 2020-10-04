@@ -1,5 +1,5 @@
 ############# BUILD STAGE ##############
-FROM node:14.8.0-alpine as build
+FROM --platform=$BUILDPLATFORM node:14.8.0-alpine as build
 ARG APP_SRC
 
 RUN apk add --no-cache --virtual .gyp \

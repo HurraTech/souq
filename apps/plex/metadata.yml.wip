@@ -1,0 +1,9 @@
+Name: Plex Media Server
+Description: Allows you to stream media from your cloud drive directly to your TV
+LongDscription:
+Publisher: HurraNet LLC
+Version: 0.1.1
+WebApp:
+  Type: container
+  TargetContainer: syncthing-web
+  TargetPort: 8384

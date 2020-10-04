@@ -82,7 +82,8 @@ func (c *Controller) GetApp(ctx echo.Context) error {
 /* GET /apps/:id/image */
 func (c *Controller) DownloadApp(ctx echo.Context) error {
 	appID := ctx.Param("id")
-	imageFile := path.Join(c.AppsDir, fmt.Sprintf("%s.tar.gz", appID))
+	arch := ctx.QueryParam("arch")
+	imageFile := path.Join(c.AppsDir, fmt.Sprintf("%s-%s.tar.gz", appID, arch))
 
 	log.Debugf("Request to download %s", imageFile)
 	_, err := os.Stat(imageFile)
@@ -100,7 +101,8 @@ func (c *Controller) DownloadApp(ctx echo.Context) error {
 func (c *Controller) DownloadAppContainerImage(ctx echo.Context) error {
 	appID := ctx.Param("app")
 	containerName := ctx.Param("container")
-	imageFile := path.Join(c.AppsDir, appID, "containers", fmt.Sprintf("%s.tar.gz", containerName))
+	arch := ctx.QueryParam("arch")
+	imageFile := path.Join(c.AppsDir, appID, "containers", fmt.Sprintf("%s-%s.tar.gz", containerName, arch))
 
 	log.Debugf("Request to download %s", imageFile)
 	_, err := os.Stat(imageFile)
