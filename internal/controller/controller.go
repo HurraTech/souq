@@ -190,3 +190,26 @@ func (c *Controller) readAppMetadata(name string) (*App, error) {
 	app.Containers = strings.Join(images, ",")
 	return &app, nil
 }
+
+/* GET /hurraos */
+func (c *Controller) ListHurraOSVersions(ctx echo.Context) error {
+	return ctx.JSON(http.StatusOK,
+		map[string]interface{}{
+			"v0.1": map[string]string{
+				"version":      "v0.1",
+				"release_date": "2021-02-01",
+				"url":          fmt.Sprintf("%s://%s/hurraos/v0.1", ctx.Scheme(), ctx.Request().Host),
+			},
+		})
+}
+
+/* GET /hurrsos/:version */
+func (c *Controller) DownloadHurraOS(ctx echo.Context) error {
+	return ctx.JSON(http.StatusOK,
+		map[string]interface{}{
+			"v0.1": map[string]string{
+				"release_date": "2021-02-02",
+				"url":          fmt.Sprintf("%s - %s/hurraos/2021-02-01", ctx.Request().URL, ctx.Request().Host),
+			},
+		})
+}
