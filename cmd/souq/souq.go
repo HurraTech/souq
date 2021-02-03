@@ -20,6 +20,7 @@ type Options struct {
 	Port       int            `short:"p" long:"port" env:"PORT" description:"Port to listen HTTP server" default:"5060"`
 	Database   flags.Filename `short:"d" long:"db" env:"DB" description:"Database filename" default:"souq.db"`
 	AppsDir    string         `short:"m" long:"apps_dir" env:"APPS_DIR" description:"Where to store metadta about applications" default:"./apps"`
+	OSDir      string         `short:"u" long:"os_dir" env:"OS_DIR" description:"Where to store metadta about applications" default:"./hurraos"`
 	EnableAuth bool           `short:"a" long:"enable_auth" env:"ENABLE_AUTH" description:"Sets up Basic Auth in front of API"`
 	Verbose    bool           `short:"v" long:"verbose" description:"Enable verbose logging"`
 }
@@ -46,7 +47,13 @@ func main() {
 		appsDir = options.AppsDir
 	}
 
-	controller := &controller.Controller{AppsDir: appsDir}
+	osDir, err := filepath.Abs(options.OSDir)
+	if err != nil {
+		log.Warnf("Could not determine absolute path for OS updates directory '%s': %s", options.AppsDir, err)
+		osDir = options.OSDir
+	}
+
+	controller := &controller.Controller{AppsDir: appsDir, OSDir: osDir}
 	e := echo.New()
 	e.Use(middleware.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
 		// Be careful to use constant time comparison to prevent timing attacks
@@ -63,7 +70,7 @@ func main() {
 	e.GET("/apps/:id/containers", controller.ListAppContainers)
 	e.GET("/containers/:app/:container", controller.DownloadAppContainerImage)
 	e.GET("/hurraos", controller.ListHurraOSVersions)
-	e.GET("/hurraos/:version", controller.DownloadHurraOS)
+	e.GET("/hurraos/:image", controller.DownloadHurraOS)
 
 	log.Fatal(e.Start(fmt.Sprintf("%s:%d", options.Host, options.Port)))
 }

@@ -21,6 +21,7 @@ var (
 
 type Controller struct {
 	AppsDir string
+	OSDir   string
 }
 
 type App struct {
@@ -193,23 +194,89 @@ func (c *Controller) readAppMetadata(name string) (*App, error) {
 
 /* GET /hurraos */
 func (c *Controller) ListHurraOSVersions(ctx echo.Context) error {
-	return ctx.JSON(http.StatusOK,
-		map[string]interface{}{
-			"v0.1": map[string]string{
-				"version":      "v0.1",
-				"release_date": "2021-02-01",
-				"url":          fmt.Sprintf("%s://%s/hurraos/v0.1", ctx.Scheme(), ctx.Request().Host),
-			},
-		})
+	log.Debugf("Listing directory %s", c.OSDir)
+	files, err := ioutil.ReadDir(c.OSDir)
+	if err != nil {
+		log.Error("Error while listing OS update files: ", err)
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "unexpected error"})
+	}
+
+	res := make(map[string]interface{})
+	for _, f := range files {
+		match, _ := filepath.Match("*.img", f.Name())
+		if !match {
+			continue
+		}
+
+		stat, err := os.Stat(path.Join(c.OSDir, f.Name()))
+		if err != nil {
+			log.Error("Error while stating file: ", f.Name())
+			return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "unexpected error"})
+		}
+
+		// Read full image's sha file
+		file, err := os.Open(path.Join(c.OSDir, fmt.Sprintf("%s.sha", f.Name())))
+		if err != nil {
+			log.Errorf("Error while opening SHA file %s.sha: %s: %s", f.Name(), err)
+			continue
+		}
+		defer func() {
+			if err = file.Close(); err != nil {
+				log.Errorf("Error while closing SHA file %s.sha: %s", f.Name(), err)
+			}
+		}()
+
+		image_sha, err := ioutil.ReadAll(file)
+		if err != nil {
+			log.Errorf("Error while reading SHA file %s.sha: %s: %s", f.Name(), err)
+			continue
+		}
+
+		// Read update image's sha file
+		file2, err := os.Open(path.Join(c.OSDir, fmt.Sprintf("%s.mender.sha", f.Name())))
+		if err != nil {
+			log.Errorf("Error while opening SHA file %s.mender.sha: %s: %s", f.Name(), err)
+			continue
+		}
+		defer func() {
+			if err = file2.Close(); err != nil {
+				log.Errorf("Error while closing SHA file %s.mender.sha: %s", f.Name(), err)
+			}
+		}()
+		update_image_sha, err := ioutil.ReadAll(file2)
+		if err != nil {
+			log.Errorf("Error while reading SHA file %s.mender.sha: %s: %s", f.Name(), err)
+			continue
+		}
+
+		ver := strings.TrimSuffix(f.Name(), filepath.Ext(f.Name()))
+		res[ver] = map[string]string{
+			"version":          ver,
+			"release_date":     stat.ModTime().Format("2006-01-02"),
+			"full_image":       fmt.Sprintf("%s://%s/%s/%s", ctx.Scheme(), ctx.Request().Host, filepath.Base(c.OSDir), f.Name()),
+			"full_image_sha":   strings.TrimSpace(string(image_sha[:])),
+			"bmap":             fmt.Sprintf("%s://%s/%s/%s", ctx.Scheme(), ctx.Request().Host, filepath.Base(c.OSDir), fmt.Sprintf("%s.bmap", f.Name())),
+			"update_image":     fmt.Sprintf("%s://%s/%s/%s", ctx.Scheme(), ctx.Request().Host, filepath.Base(c.OSDir), fmt.Sprintf("%s.mender", f.Name())),
+			"update_image_sha": strings.TrimSpace(string(update_image_sha[:])),
+		}
+	}
+
+	return ctx.JSON(http.StatusOK, res)
 }
 
-/* GET /hurrsos/:version */
+/* GET /hurrsos/:image */
 func (c *Controller) DownloadHurraOS(ctx echo.Context) error {
-	return ctx.JSON(http.StatusOK,
-		map[string]interface{}{
-			"v0.1": map[string]string{
-				"release_date": "2021-02-02",
-				"url":          fmt.Sprintf("%s - %s/hurraos/2021-02-01", ctx.Request().URL, ctx.Request().Host),
-			},
-		})
+	image := ctx.Param("image")
+	imageFile := path.Join(c.OSDir, image)
+
+	log.Debugf("Request to download %s", imageFile)
+	_, err := os.Stat(imageFile)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return ctx.JSON(http.StatusNotFound, map[string]string{"messsage": "not found"})
+		}
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "unexpected error"})
+	}
+
+	return ctx.File(imageFile)
 }
