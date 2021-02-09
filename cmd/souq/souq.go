@@ -70,7 +70,8 @@ func main() {
 	e.GET("/apps/:id/containers", controller.ListAppContainers)
 	e.GET("/containers/:app/:container", controller.DownloadAppContainerImage)
 	e.GET("/hurraos", controller.ListHurraOSVersions)
-	e.GET("/hurraos/:image", controller.DownloadHurraOS)
+	e.GET("/hurraos/:version", controller.GetHurraOSVersionInfo)
+	e.GET("/hurraos/files/:image", controller.DownloadHurraOS)
 
 	log.Fatal(e.Start(fmt.Sprintf("%s:%d", options.Host, options.Port)))
 }
