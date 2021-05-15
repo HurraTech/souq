@@ -11,7 +11,7 @@ services:
     volumes:
       - syncthing-config:/config
       - type: bind
-        source: ./data
+        source: .
         target: /data
         bind:
           propagation: shared
