@@ -25,16 +25,8 @@ def main():
         image = image_tag.replace("%s/" % app_name, "", 1)
         print("Building %s" % image)
         os.chdir("%s/containers/%s" % (app_name, image))
-        os.system("docker buildx build  --platform linux/arm64,linux/amd64  -t gcr.io/hurrabuild/%s --push ." % image_tag)
-        os.system("docker pull --platform linux/arm64 gcr.io/hurrabuild/%s" % image_tag)
-        os.system("docker tag gcr.io/hurrabuild/%s %s" % (image_tag, image_tag))
-        os.system("docker save %s | gzip > ../%s-arm64.tar.gz" % (image_tag, image))
-        os.system("docker rmi %s" % image_tag)
-
-        os.system("docker pull --platform linux/amd64 gcr.io/hurrabuild/%s" % image_tag)
-        os.system("docker tag gcr.io/hurrabuild/%s %s" % (image_tag, image_tag))
-        os.system("docker save %s | gzip > ../%s-amd64.tar.gz" % (image_tag, image))
-        os.system("docker rmi %s" % image_tag)
+        os.system("docker buildx build  --platform linux/amd64  -t gcr.io/hurrabuild/%s -o type=docker,dest=- . | gzip > ../%s-amd64.tar.gz " % (image_tag,image))
+        os.system("docker buildx build  --platform linux/arm64  -t gcr.io/hurrabuild/%s -o type=docker,dest=- . | gzip > ../%s-arm64.tar.gz" % (image_tag, image))
 
 if __name__ == "__main__":
     main()
