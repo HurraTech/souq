@@ -1,1 +1,1 @@
-export const JAWHAR_API = "http://172.17.0.1:5050" // jawhar on docker host
+export const JAWHAR_API = "http://host.docker.internal:5050" // jawhar on docker host

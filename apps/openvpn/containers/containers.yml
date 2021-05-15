@@ -6,8 +6,6 @@ services:
      - NET_ADMIN
     network_mode: "host"
     image: openvpn/docker-openvpn
-    ports:
-     - "1194:1194/udp"
     restart: always
     privileged: true
     volumes:

@@ -25,8 +25,8 @@ def main():
         image = image_tag.replace("%s/" % app_name, "", 1)
         print("Building %s" % image)
         os.chdir("%s/containers/%s" % (app_name, image))
-        os.system("docker buildx build  --platform linux/amd64  -t gcr.io/hurrabuild/%s -o type=docker,dest=- . | gzip > ../%s-amd64.tar.gz " % (image_tag,image))
-        os.system("docker buildx build  --platform linux/arm64  -t gcr.io/hurrabuild/%s -o type=docker,dest=- . | gzip > ../%s-arm64.tar.gz" % (image_tag, image))
+        os.system("docker buildx build  --platform linux/amd64  -t %s -o type=docker,dest=- . | gzip > ../%s-amd64.tar.gz " % (image_tag,image))
+        os.system("docker buildx build  --platform linux/arm64  -t %s -o type=docker,dest=- . | gzip > ../%s-arm64.tar.gz" % (image_tag, image))
 
 if __name__ == "__main__":
     main()
